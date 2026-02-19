@@ -35,6 +35,7 @@ CHART_TEXT    = "#E8ECF5"
 GRID_COLOR    = "rgba(255,255,255,0.07)"
 BOTTLING_FILL = "rgba(239,1,7,0.07)"
 BOTTLING_LINE = "rgba(239,1,7,0.55)"
+CURRENT_ENDPOINT_LINE = "#00E5FF"  # highlight for "We are here" (2025/26 current matchweek)
 
 # Fixed season→colour: colours are stable regardless of which seasons are selected
 SEASON_COLORS: dict[str, str] = {
@@ -113,6 +114,18 @@ def _add_bottling_zone(fig: go.Figure, bottling_week: int) -> go.Figure:
     return fig
 
 
+def _add_current_endpoint(fig: go.Figure, current_matchweek: int) -> go.Figure:
+    """Add a vertical line and annotation for 2025/26 'We are here' (current matchweek)."""
+    fig.add_vline(
+        x=current_matchweek,
+        line=dict(color=CURRENT_ENDPOINT_LINE, width=2.5),
+        annotation_text="We are here",
+        annotation_position="top",
+        annotation_font=dict(color=CURRENT_ENDPOINT_LINE, size=12),
+    )
+    return fig
+
+
 # ── KPI cards ─────────────────────────────────────────────────────────────────
 def _kpi_card(season: str, pts: int, pos, gd: int, dropped: int) -> str:
     color = SEASON_COLORS.get(season, "#888")
@@ -130,7 +143,9 @@ def _kpi_card(season: str, pts: int, pos, gd: int, dropped: int) -> str:
 
 # ── chart builders ─────────────────────────────────────────────────────────────
 
-def build_position_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
+def build_position_chart(
+    df: pd.DataFrame, bottling_week: int, current_matchweek: int | None = None
+) -> go.Figure:
     fig = go.Figure()
     pos_df = df[df["Position"].notna()]
     for season in sorted(pos_df["Season"].unique()):
@@ -151,11 +166,15 @@ def build_position_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
         ))
     fig = _base_layout(fig, "Position (1 = top)", y_reversed=True)
     fig = _add_bottling_zone(fig, bottling_week)
+    if current_matchweek is not None:
+        fig = _add_current_endpoint(fig, current_matchweek)
     fig.update_layout(legend_title_text="Season")
     return fig
 
 
-def build_points_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
+def build_points_chart(
+    df: pd.DataFrame, bottling_week: int, current_matchweek: int | None = None
+) -> go.Figure:
     fig = go.Figure()
     # Title-pace reference line
     pace_x = list(range(1, 39))
@@ -184,11 +203,15 @@ def build_points_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
         ))
     fig = _base_layout(fig, "Cumulative points")
     fig = _add_bottling_zone(fig, bottling_week)
+    if current_matchweek is not None:
+        fig = _add_current_endpoint(fig, current_matchweek)
     fig.update_layout(legend_title_text="Season")
     return fig
 
 
-def build_gd_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
+def build_gd_chart(
+    df: pd.DataFrame, bottling_week: int, current_matchweek: int | None = None
+) -> go.Figure:
     fig = go.Figure()
     fig.add_hline(y=0, line_color="rgba(255,255,255,0.2)", line_width=1)
     for season in sorted(df["Season"].unique()):
@@ -206,6 +229,8 @@ def build_gd_chart(df: pd.DataFrame, bottling_week: int) -> go.Figure:
         ))
     fig = _base_layout(fig, "Cumulative goal difference")
     fig = _add_bottling_zone(fig, bottling_week)
+    if current_matchweek is not None:
+        fig = _add_current_endpoint(fig, current_matchweek)
     fig.update_layout(legend_title_text="Season")
     return fig
 
@@ -383,7 +408,8 @@ def main() -> None:
         st.markdown("---")
         st.markdown(f"""
         <div style="font-size:12px;color:#64748B">
-            <b style="color:{ARSENAL_GOLD}">─ ─</b> Title pace = {TITLE_PACE_PTS} pts/38 games<br><br>
+            <b style="color:{ARSENAL_GOLD}">─ ─</b> Title pace = {TITLE_PACE_PTS} pts/38 games<br>
+            <b style="color:{CURRENT_ENDPOINT_LINE}">│</b> We are here (2025/26 current matchweek)<br><br>
             <b style="color:{RESULT_COLORS['W']}">■</b> Win &nbsp;
             <b style="color:{RESULT_COLORS['D']}">■</b> Draw &nbsp;
             <b style="color:{RESULT_COLORS['L']}">■</b> Loss
@@ -395,6 +421,13 @@ def main() -> None:
         return
 
     filtered = df[df["Season"].isin(selected)].copy()
+
+    # Current 2025/26 endpoint: show "We are here" on position/points/GD charts
+    current_mw: int | None = None
+    if "2025/26" in selected:
+        s2526 = filtered[filtered["Season"] == "2025/26"]
+        if not s2526.empty:
+            current_mw = int(s2526["Matchweek"].max())
 
     # ── KPI cards ─────────────────────────────────────────────────────────────
     st.markdown('<div class="section-title">Season Summary</div>', unsafe_allow_html=True)
@@ -426,16 +459,16 @@ def main() -> None:
         if pos_df.empty:
             st.info("No position data for selected seasons (2025/26 only).")
         else:
-            st.plotly_chart(build_position_chart(pos_df, bottling_week), use_container_width=True)
+            st.plotly_chart(build_position_chart(pos_df, bottling_week, current_mw), use_container_width=True)
     with col2:
         st.markdown('<div class="section-title">Cumulative points vs title pace</div>', unsafe_allow_html=True)
-        st.plotly_chart(build_points_chart(filtered, bottling_week), use_container_width=True)
+        st.plotly_chart(build_points_chart(filtered, bottling_week, current_mw), use_container_width=True)
 
     # ── GD + Dropped ───────────────────────────────────────────────────────────
     col3, col4 = st.columns(2)
     with col3:
         st.markdown('<div class="section-title">Cumulative goal difference</div>', unsafe_allow_html=True)
-        st.plotly_chart(build_gd_chart(filtered, bottling_week), use_container_width=True)
+        st.plotly_chart(build_gd_chart(filtered, bottling_week, current_mw), use_container_width=True)
     with col4:
         st.markdown('<div class="section-title">Games dropped from half-time lead</div>', unsafe_allow_html=True)
         hist_only = filtered[filtered["Season"] != "2025/26"]
