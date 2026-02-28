@@ -27,15 +27,16 @@ DATA_PATH = BASE_DIR / "epl_final.csv"
 EXTRA_PATH = BASE_DIR / "arsenal_2025_26_pl.csv"
 
 # ── colour palette ────────────────────────────────────────────────────────────
-APP_BG        = "#050816"
-CHART_BG      = "#0A0F2A"
+# Light theme: white cards on soft grey background
+APP_BG        = "#F9FAFB"   # page background
+CHART_BG      = "#FFFFFF"   # chart/card background
 ARSENAL_RED   = "#EF0107"
 ARSENAL_GOLD  = "#C8A951"
-CHART_TEXT    = "#E8ECF5"
-GRID_COLOR    = "rgba(255,255,255,0.07)"
-BOTTLING_FILL = "rgba(239,1,7,0.07)"
-BOTTLING_LINE = "rgba(239,1,7,0.55)"
-CURRENT_ENDPOINT_LINE = "#00E5FF"  # highlight for "We are here" (2025/26 current matchweek)
+CHART_TEXT    = "#111827"   # primary text colour
+GRID_COLOR    = "rgba(15,23,42,0.08)"
+BOTTLING_FILL = "rgba(239,68,68,0.06)"
+BOTTLING_LINE = "rgba(239,68,68,0.85)"
+CURRENT_ENDPOINT_LINE = "#2563EB"  # highlight for "We are here" (2025/26 current matchweek)
 
 # Fixed season→colour: colours are stable regardless of which seasons are selected
 SEASON_COLORS: dict[str, str] = {
@@ -71,7 +72,7 @@ def _base_layout(fig: go.Figure, yaxis_title: str, y_reversed: bool = False) -> 
         title_font=dict(size=14, color=CHART_TEXT),
         tickfont=dict(size=11, color=CHART_TEXT),
         title_standoff=10,
-        showline=True, linewidth=1, linecolor="rgba(255,255,255,0.1)",
+        showline=True, linewidth=1, linecolor="rgba(15,23,42,0.2)",
         zeroline=False,
     )
     if y_reversed:
@@ -96,7 +97,7 @@ def _base_layout(fig: go.Figure, yaxis_title: str, y_reversed: bool = False) -> 
         title_font=dict(size=14, color=CHART_TEXT),
         tickfont=dict(size=11, color=CHART_TEXT),
         title_standoff=20,
-        showline=True, linewidth=1, linecolor="rgba(255,255,255,0.1)", zeroline=False,
+        showline=True, linewidth=1, linecolor="rgba(15,23,42,0.2)", zeroline=False,
     )
     fig.update_yaxes(**yax)
     return fig
@@ -132,12 +133,13 @@ def _kpi_card(season: str, pts: int, pos, gd: int, dropped: int) -> str:
     pos_str = f"#{int(pos)}" if pos is not None and not pd.isna(pos) else "–"
     gd_str  = f"+{gd}" if gd >= 0 else str(gd)
     return f"""
-    <div style="border-left:4px solid {color};background:rgba(255,255,255,0.04);
-                border-radius:8px;padding:10px 14px;min-width:150px;flex:1">
+    <div style="border-left:4px solid {color};background:#F3F4F6;
+                border-radius:8px;padding:10px 14px;min-width:150px;flex:1;
+                box-shadow:0 1px 2px rgba(15,23,42,0.06)">
         <div style="font-size:13px;color:{color};font-weight:700;letter-spacing:.5px">{season}</div>
-        <div style="font-size:26px;font-weight:800;color:#F5F7FB;margin:4px 0">{pts} <span style="font-size:14px;color:#94A3B8">pts</span></div>
-        <div style="font-size:12px;color:#94A3B8">Pos: {pos_str} &nbsp;|&nbsp; GD: {gd_str}</div>
-        <div style="font-size:12px;color:#F87171;margin-top:3px">Dropped from HT lead: <b>{dropped}</b> game(s)</div>
+        <div style="font-size:26px;font-weight:800;color:#111827;margin:4px 0">{pts} <span style="font-size:14px;color:#6B7280">pts</span></div>
+        <div style="font-size:12px;color:#4B5563">Pos: {pos_str} &nbsp;|&nbsp; GD: {gd_str}</div>
+        <div style="font-size:12px;color:#B91C1C;margin-top:3px">Dropped from HT lead: <b>{dropped}</b> game(s)</div>
     </div>"""
 
 
@@ -213,7 +215,7 @@ def build_gd_chart(
     df: pd.DataFrame, bottling_week: int, current_matchweek: int | None = None
 ) -> go.Figure:
     fig = go.Figure()
-    fig.add_hline(y=0, line_color="rgba(255,255,255,0.2)", line_width=1)
+    fig.add_hline(y=0, line_color="rgba(15,23,42,0.25)", line_width=1)
     for season in sorted(df["Season"].unique()):
         s = df[df["Season"] == season].sort_values("Matchweek")
         color = SEASON_COLORS.get(season, "#888")
@@ -271,7 +273,7 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure:
         z=z, x=mws, y=seasons,
         text=text, customdata=hover,
         texttemplate="%{text}",
-        textfont=dict(size=9, color="white"),
+        textfont=dict(size=9, color=CHART_TEXT),
         hovertemplate="%{customdata}<extra></extra>",
         colorscale=[
             [0.0,  RESULT_COLORS["L"]],
@@ -291,7 +293,7 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure:
             title="Matchweek", dtick=1,
             title_font=dict(size=14, color=CHART_TEXT),
             tickfont=dict(size=10, color=CHART_TEXT),
-            gridcolor="rgba(0,0,0,0)",
+            gridcolor="rgba(209,213,219,0.7)",
         ),
         yaxis=dict(
             title="Season",
@@ -375,6 +377,7 @@ def main() -> None:
         border-left:3px solid {ARSENAL_RED};
     }}
     .kpi-row {{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:1rem; }}
+    footer {{ visibility: hidden; }}
     </style>
     """, unsafe_allow_html=True)
 
