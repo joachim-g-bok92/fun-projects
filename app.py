@@ -69,8 +69,8 @@ def _base_layout(fig: go.Figure, yaxis_title: str, y_reversed: bool = False) -> 
     yax: dict = dict(
         title=yaxis_title,
         gridcolor=GRID_COLOR,
-        title_font=dict(size=14, color=CHART_TEXT),
-        tickfont=dict(size=11, color=CHART_TEXT),
+        title_font=dict(size=15, color=CHART_TEXT),
+        tickfont=dict(size=12, color=CHART_TEXT),
         title_standoff=10,
         showline=True, linewidth=1, linecolor="rgba(15,23,42,0.2)",
         zeroline=False,
@@ -82,11 +82,11 @@ def _base_layout(fig: go.Figure, yaxis_title: str, y_reversed: bool = False) -> 
     fig.update_layout(
         plot_bgcolor=CHART_BG,
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=CHART_TEXT, size=12),
+        font=dict(color=CHART_TEXT, size=13),
         margin=dict(l=60, r=24, t=40, b=60),
         legend=dict(
-            font=dict(size=11, color=CHART_TEXT),
-            title_font=dict(size=13, color=CHART_TEXT),
+            font=dict(size=12, color=CHART_TEXT),
+            title_font=dict(size=14, color=CHART_TEXT),
             orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
         ),
         hovermode="x unified",
@@ -94,8 +94,8 @@ def _base_layout(fig: go.Figure, yaxis_title: str, y_reversed: bool = False) -> 
     fig.update_xaxes(
         dtick=1, range=[0.5, 38.5], gridcolor=GRID_COLOR,
         title="Matchweek",
-        title_font=dict(size=14, color=CHART_TEXT),
-        tickfont=dict(size=11, color=CHART_TEXT),
+        title_font=dict(size=15, color=CHART_TEXT),
+        tickfont=dict(size=12, color=CHART_TEXT),
         title_standoff=20,
         showline=True, linewidth=1, linecolor="rgba(15,23,42,0.2)", zeroline=False,
     )
@@ -110,7 +110,7 @@ def _add_bottling_zone(fig: go.Figure, bottling_week: int) -> go.Figure:
         line=dict(color=BOTTLING_LINE, width=1.5, dash="dash"),
         annotation_text="Bottling zone",
         annotation_position="top left",
-        annotation_font=dict(color=ARSENAL_RED, size=11),
+        annotation_font=dict(color=ARSENAL_RED, size=13),
     )
     return fig
 
@@ -122,7 +122,7 @@ def _add_current_endpoint(fig: go.Figure, current_matchweek: int) -> go.Figure:
         line=dict(color=CURRENT_ENDPOINT_LINE, width=2.5),
         annotation_text="We are here",
         annotation_position="top",
-        annotation_font=dict(color=CURRENT_ENDPOINT_LINE, size=12),
+        annotation_font=dict(color=CURRENT_ENDPOINT_LINE, size=13),
     )
     return fig
 
@@ -273,7 +273,7 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure:
         z=z, x=mws, y=seasons,
         text=text, customdata=hover,
         texttemplate="%{text}",
-        textfont=dict(size=9, color=CHART_TEXT),
+        textfont=dict(size=10, color=CHART_TEXT),
         hovertemplate="%{customdata}<extra></extra>",
         colorscale=[
             [0.0,  RESULT_COLORS["L"]],
@@ -291,14 +291,14 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure:
         margin=dict(l=80, r=24, t=80, b=60),
         xaxis=dict(
             title="Matchweek", dtick=1,
-            title_font=dict(size=14, color=CHART_TEXT),
-            tickfont=dict(size=10, color=CHART_TEXT),
+            title_font=dict(size=15, color=CHART_TEXT),
+            tickfont=dict(size=11, color=CHART_TEXT),
             gridcolor="rgba(209,213,219,0.7)",
         ),
         yaxis=dict(
             title="Season",
-            title_font=dict(size=14, color=CHART_TEXT),
-            tickfont=dict(size=11, color=CHART_TEXT),
+            title_font=dict(size=15, color=CHART_TEXT),
+            tickfont=dict(size=12, color=CHART_TEXT),
         ),
         # Slightly taller canvas so rows and legend breathe more
         height=max(320, len(seasons) * 50 + 140),
@@ -311,7 +311,7 @@ def build_heatmap(df: pd.DataFrame) -> go.Figure:
         fig.add_annotation(
             x=xp, y=1.12, xref="paper", yref="paper",
             text=f'<span style="color:{col}">■</span> {label}',
-            showarrow=False, font=dict(size=12, color=CHART_TEXT), align="center",
+            showarrow=False, font=dict(size=13, color=CHART_TEXT), align="center",
         )
     return fig
 
@@ -327,7 +327,7 @@ def build_dropped_chart(df: pd.DataFrame) -> go.Figure:
         x=seasons, y=counts,
         marker_color=colors,
         text=counts, textposition="outside",
-        textfont=dict(color=CHART_TEXT, size=11),
+        textfont=dict(color=CHART_TEXT, size=12),
         hovertemplate="<b>%{x}</b><br>Games dropped from HT lead: %{y}<extra></extra>",
     ))
     # Flag the notorious bottling seasons
@@ -344,15 +344,15 @@ def build_dropped_chart(df: pd.DataFrame) -> go.Figure:
         margin=dict(l=50, r=24, t=30, b=80),
         xaxis=dict(
             title="Season", tickangle=-45,
-            title_font=dict(size=14, color=CHART_TEXT),
-            tickfont=dict(size=11, color=CHART_TEXT),
+            title_font=dict(size=15, color=CHART_TEXT),
+            tickfont=dict(size=12, color=CHART_TEXT),
             gridcolor="rgba(0,0,0,0)",
         ),
         yaxis=dict(
             title="Games (led HT, didn't win)",
             gridcolor=GRID_COLOR,
-            title_font=dict(size=13, color=CHART_TEXT),
-            tickfont=dict(size=11, color=CHART_TEXT),
+            title_font=dict(size=14, color=CHART_TEXT),
+            tickfont=dict(size=12, color=CHART_TEXT),
             zeroline=False,
         ),
     )
@@ -369,15 +369,17 @@ def main() -> None:
 
     st.markdown(f"""
     <style>
-    html, body, [class*="css"] {{ background-color:{APP_BG}; color:{CHART_TEXT}; }}
-    .block-container {{ padding-top:2.5rem; }}
+    html, body, [class*="css"], [data-testid="stAppViewContainer"], [data-testid="stHeader"],
+    [data-testid="stSidebar"] > div:first-child {{ background-color:{APP_BG} !important; color:{CHART_TEXT} !important; }}
+    .block-container {{ padding-top:2.5rem; background-color:{APP_BG}; }}
     .section-title {{
-        font-size:15px; font-weight:700; color:{CHART_TEXT};
+        font-size:16px; font-weight:700; color:{CHART_TEXT};
         padding:6px 0 6px 12px; margin:0.5rem 0 0.2rem 0;
         border-left:3px solid {ARSENAL_RED};
     }}
     .kpi-row {{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:1rem; }}
     footer {{ visibility: hidden; }}
+    [data-testid="stSidebar"] .stMarkdown {{ color:#374151 !important; }}
     </style>
     """, unsafe_allow_html=True)
 

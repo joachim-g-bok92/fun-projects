@@ -1,0 +1,7 @@
+# Force light theme so the whole app (sidebar, header, main) matches the light chart area
+[theme]
+primaryColor = "#EF0107"
+backgroundColor = "#F9FAFB"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#111827"
+font = "sans serif"
